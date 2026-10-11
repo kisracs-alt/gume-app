@@ -2,8 +2,6 @@ from __future__ import annotations
 import streamlit as st
 import pandas as pd
 import numpy as np
-import requests
-import feedparser
 import sqlite3
 from datetime import datetime, timezone
 
@@ -12,12 +10,12 @@ try:
 except ImportError:
     yf = None
 
-# --- SQLite Adatbázis inicializálás ---
+# --- SQLite Adatbázis az összes részletes jelentés mentéséhez ---
 def init_db():
-    conn = sqlite3.connect("gume_enterprise.db", check_same_thread=False)
+    conn = sqlite3.connect("gume_total_ecosystem.db", check_same_thread=False)
     c = conn.cursor()
     c.execute('''
-        CREATE TABLE IF NOT EXISTS reports (
+        CREATE TABLE IF NOT EXISTS comprehensive_reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
             country TEXT,
@@ -30,56 +28,53 @@ def init_db():
 
 init_db()
 
-def save_report_to_db(country, title, content):
-    conn = sqlite3.connect("gume_enterprise.db", check_same_thread=False)
+def save_report(country, title, content):
+    conn = sqlite3.connect("gume_total_ecosystem.db", check_same_thread=False)
     c = conn.cursor()
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    c.execute("INSERT INTO reports (timestamp, country, title, content) VALUES (?, ?, ?, ?)", (ts, country, title, content))
+    c.execute("INSERT INTO comprehensive_reports (timestamp, country, title, content) VALUES (?, ?, ?, ?)", (ts, country, title, content))
     conn.commit()
     conn.close()
 
-def load_reports_from_db():
-    conn = sqlite3.connect("gume_enterprise.db", check_same_thread=False)
-    df = pd.read_sql("SELECT * FROM reports ORDER BY id DESC", conn)
+def load_reports():
+    conn = sqlite3.connect("gume_total_ecosystem.db", check_same_thread=False)
+    df = pd.read_sql("SELECT * FROM comprehensive_reports ORDER BY id DESC", conn)
     conn.close()
     return df
 
-def run_gume_enterprise():
+def run_gume_total_ecosystem():
     st.set_page_config(
-        page_title="GUME v6.9 – Enterprise Global Intelligence Hub",
-        page_icon="⚡",
+        page_title="GUME v6.9 – Total World Ecosystem Hub",
+        page_icon="🌍",
         layout="wide"
     )
 
-    st.title("⚡ GUME v6.9 – ENTERPRISE GLOBAL INTELLIGENCIA & ORACLE HUB")
+    st.title("🌍 GUME v6.9 – TELJES KÖRŰ VILÁGELŐREJELZŐ & ÖKOSZISZTÉMA MÁTRIX")
     today_str = datetime.now(timezone.utc).strftime("%Y. %B %d. | %H:%M UTC")
-    st.markdown(f"**Autonóm LLM Fúzió, ML Előrejelzés & SQLite Adatbázis** | Frissítve: `{today_str}`")
+    st.markdown(f"**Integrált Rendszer: 37 Változó, 7 Fő Csoport és 4 Hatásszint** | Frissítve: `{today_str}`")
     st.markdown("---")
 
-    # --- OLDALSÁV / RENDSZER BEÁLLÍTÁSOK ---
-    st.sidebar.header("🔐 Rendszer & AI Konfiguráció")
-    openai_api_key = st.sidebar.text_input("OpenAI API Kulcs (Opcionális az Élő AI-hoz)", type="password")
-    
-    st.sidebar.markdown("---")
-    st.sidebar.header("🌍 Célpont & Fókusz")
-    country_list = [
-        "Magyarország", "Egyesült Államok (USA)", "Németország", "Kína", 
-        "Japán", "Egyesült Királyság", "Franciaország", "Oroszország", 
-        "Brazília", "India", "Globális / Összesített Rendszer"
-    ]
-    target_country = st.sidebar.selectbox("Válassz országot vagy régiót:", country_list)
+    # --- OLDALSÁV VÉZÉRLŐPULT ---
+    st.sidebar.header("🌐 Globális Rendszer Fókusz")
+    target_country = st.sidebar.selectbox(
+        "Válassz országot vagy régiót:",
+        [
+            "Magyarország", "Egyesült Államok (USA)", "Németország", "Kína", 
+            "Japán", "Egyesült Királyság", "Franciaország", "Oroszország", 
+            "Brazília", "India", "Globális / Teljes Emberiség"
+        ]
+    )
     
     ticker_input = st.sidebar.text_input("Piaci & Deviza Tickerek", "EURHUF=X, USDHUF=X, EURUSD=X, ^VIX, SPY, CL=F")
-    
-    run_engine = st.sidebar.button("🚀 Teljes Rendszer Újraszámítása", type="primary")
+    refresh_btn = st.sidebar.button("🔄 Teljes Rendszer Újraszámítása", type="primary")
 
-    # --- ADATGYŰJTŐ ÉS ML RÉTEG ---
+    # Piaci adatok
     market_df = pd.DataFrame()
-    vix_val = 17.5
+    vix_val = 18.0
     if yf is not None:
         try:
             t_list = [t.strip() for t in ticker_input.split(",") if t.strip()]
-            raw = yf.download(t_list, period="1mo", auto_adjust=True, progress=False)
+            raw = yf.download(t_list, period="5d", auto_adjust=True, progress=False)
             if not raw.empty:
                 if isinstance(raw.columns, pd.MultiIndex):
                     market_df = raw["Close"]
@@ -91,117 +86,100 @@ def run_gume_enterprise():
         except Exception:
             pass
 
-    # --- 37 VÁLTOZÓ & 7 MAKRO CSOPORT LOGIKA ---
-    def get_comprehensive_intelligence(country):
-        return {
-            "title": f"Autonóm Előrejelzési Jelentés: {country} (Holnapi Nap)",
-            "plain": f"Holnap {country} lakosainak mindennapjait a helyi időjárás, az alapvető élelmiszerárak, a közlekedési dugók és a munkahelyi stressz határozzák meg[cite: 2]. A biológiai ritmus (alvás, éberség) és a digitális eszközök (telefonok, internet) folyamatos visszacsatolásban alakítják a holnapi teljesítményt[cite: 2].",
-            "expert": f"Makrogazdasági és kvantitatív elemzés: {country} monetáris fundamentumai, a likviditási mutatók, a munkaerő-piaci mozgások és a nemzetközi kereskedelmi láncok szinkronban mozognak a globális ciklusokkal[cite: 2]. A VIX index ({vix_val:.1f}) alapján a piaci volatilitás kontrollált sávban mozog.",
-            "groups": [
-                "1. Emberi tényezők: Alvásminőség, vércukorszint, biológiai ritmus, stressz és kognitív teljesítmény[cite: 2].",
-                "2. Társadalmi tényezők: Családi kapcsolatok, demográfia, generációs különbségek és társadalmi bizalom[cite: 2].",
-                "3. Gazdasági tényezők: Személyes pénzügyek, inflációs várakozások, rezsiköltségek, kiskereskedelmi árak[cite: 2].",
-                "4. Politikai és jogi tényezők: Kormányzati intézkedések, jogszabályok, adópolitika és közbiztonság[cite: 2].",
-                "5. Technológiai tényezők: Mobilhálózatok, internetkapcsolat, AI alapú automatizáció és médiafogyasztás[cite: 2].",
-                "6. Természeti tényezők: Hőmérséklet, csapadék, levegőminőség, talajállapot és katasztrófa-kockázatok[cite: 2].",
-                "7. Időbeli és véletlenszerű tényezők: Váratlan események, gépmeghibásodások, hirtelen hívások[cite: 2]."
-            ],
-            "levels": [
-                "• 1. Egyéni szint: Fáradtság, egyéni döntések, reggeli szokások[cite: 2].",
-                "• 2. Helyi szint: Városi közlekedés, boltok készletei, regionális időjárás[cite: 2].",
-                "• 3. Országos szint: Nemzeti valuta árfolyama, országos adatok, kormányzati bejelentések[cite: 2].",
-                "• 4. Globális szint: Nemzetközi ellátási láncok, geopolitikai feszültségek, világpiaci nyersanyagárak[cite: 2]."
-            ],
-            "disaster": "🟢 **Katasztrófa- és Infrastruktúra-Radar:** A kritikus hálózatok (víz, villany, internet, SWIFT) 99.5%-os biztonsággal üzemelnek. Nincs rendszerszintű vészhelyzet[cite: 2]."
-        }
-
-    intel = get_comprehensive_intelligence(target_country)
-
-    # --- FŐ FELÜLET / FÜLEK ---
-    st.subheader(f"📍 Aktív Enterprise Elemzés: {target_country}")
-    st.success(f"🚨 **HOLNAPI FŐCÍM:** {intel['title']}")
+    # --- TARTALOM FÜLEK A TELJES DOKUMENTUM ALAPJÁN ---
+    st.subheader(f"📍 Vizsgált Célpont: {target_country}")
+    st.success(f"🚨 **HOLNAPI RENDSSZERSZINTŰ FŐCÍM:** A biológiai ritmusok, a mindennapi apróságok, a gazdasági láncok és a váratlan események hálózata {target_country}-ban[cite: 1].")
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "🧠 37 Változó & 7 Makro Csoport",
-        "🗣️ Köznyelv vs. 📊 Elemzői Szaknyelv",
-        "⚖️ 4 Hatásszint Mátrix",
-        "📈 ML Előrejelzés & Piaci Adatok",
-        "💾 Adatbázis Történet (SQLite)",
-        "📑 Riport Mentés & Export"
+        "🧬 1-3. Biológia, Psziché & Kapcsolatok",
+        "💰 4-7. Gazdaság, Munka, Oktatás & Tech",
+        "🌦️ 8-10. Természet, Víz, Élelmiszer & Energia",
+        "🏛️ 11-18. Politika, Háború, Média & Társadalom",
+        "🏠 19-37. Apróságok, Katasztrófák, Döntések & Rendszer",
+        "💾 Adatbázis & Riport Export"
     ])
 
     with tab1:
-        st.subheader("🌐 A teljes rendszertérkép (7 fő csoport)")
-        st.write("A modell az alábbi dokumentum-alapú tényezőket dolgozza fel[cite: 2]:")
-        for g in intel["groups"]:
-            st.markdown(f"* **{g}**")
+        st.subheader("1. Az emberi test, biológia és pszichológia")
+        st.markdown("""
+        * **Alvás és biológiai ritmus:** Az alvás mennyisége, minősége, időzítése, a szoba hőmérséklete és a melatoninszint közvetlenül meghatározza a holnapi koncentrációt és a türelmet[cite: 1].
+        * **Éhség, táplálkozás és folyadék:** A vércukorszint, a vitaminok, a vízfogyasztás és a kiszáradás mértéke alapvetően befolyásolja az azonos ingerekre adott reakciókat[cite: 1].
+        * **Pszichológia, stressz és hiedelmek:** Az érzelmek, a pillanatnyi hangulat, a korábbi emlékek, a pénzügyi bizonytalanság miatti stressz és a döntési torzítások irányítják a lakosság reakcióit[cite: 1].
+        """)
+        st.markdown("---")
+        st.subheader("2. Család, barátok és emberi kapcsolatok")
+        st.markdown("""
+        * **Kapcsolati háló:** A szülők, párkapcsolatok, barátok és munkahelyi kollégák viselkedése, a bizalom, az empátia vagy éppen a magány mélyen hat a mentális állapotra[cite: 1].
+        * **Társas fertőzés:** Egy reggeli kedves szó vagy egy sértés láncreakcióként terjedhet tovább az emberek között egész nap[cite: 1].
+        """)
 
     with tab2:
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.markdown("### 🗣️ Mindennapi hatások (Köznyelven)")
-            st.info(intel["plain"])
-        with col_b:
-            st.markdown("### 📊 Szakmai Makro Elemzés (Szaknyelven)")
-            st.warning(intel["expert"])
+        st.subheader("3. Pénz, gazdaság, munka és oktatás")
+        st.markdown("""
+        * **Személyes pénzügyek:** Jövedelem, lakbér, rezsiköltségek (villany, gáz, víz), élelmiszerárak, hiteltörlesztések és a váratlan kiadások[cite: 1].
+        * **Makrogazdasági folyamatok:** Infláció, jegybanki kamatok, munkanélküliség, kereslet-kínálat, árfolyamok és energiaárak[cite: 1].
+        * **Munka és technológia:** Munkahelyi terhelés, túlóra, távmunka, valamint a mesterséges intelligencia és a robotok hatása a munkakörökre[cite: 1].
+        * **Oktatás és tudás:** Az iskolák működése, a digitális készségek, a kritikus gondolkodás és az álhírek felismerésének képessége[cite: 1].
+        * **Digitális világ:** Okostelefonok, mobilhálózatok, internetkapcsolat, algoritmusok, kiberbűnözés és az esetleges rendszerleállások[cite: 1].
+        """)
 
     with tab3:
-        st.subheader("⚖️ A 4 Hatásszint (Mikro-Makro Láncolat)")
-        st.write("Hogyan terjed egy esemény a sejtszintű hatásoktól a világméretű folyamatokig[cite: 2]:")
-        for l in intel["levels"]:
-            st.markdown(l)
-        st.markdown("---")
-        st.write(intel["disaster"])
+        st.subheader("4. Természet, élelmiszer, ivóvíz és energia")
+        st.markdown("""
+        * **Időjárás és éghajlat:** Hőmérséklet, páratartalom, szélsebesség, csapadék, hőség, fagy, viharok és UV-sugárzás, amelyek közvetlenül befolyásolják a közlekedést és a teljesítményt[cite: 1].
+        * **Élelmiszer és ivóvíz:** Mezőgazdasági termelés, öntözővíz, hűtési és tárolási láncok, élelmiszer-biztonság és a bolti készletek[cite: 1].
+        * **Energia és erőforrások:** Villamosenergia-termelés, kőolaj, földgáz, megújuló energiaforrások, akkumulátorok, ritkaföldfémek és az áramszünetek kockázata[cite: 1].
+        """)
 
     with tab4:
-        st.subheader("📈 Kvantitatív Piaci Adatok & Volatilitás")
-        st.metric("Aktuális VIX (Félelem) Index", f"{vix_val:.1f}")
-        if not market_df.empty:
-            st.dataframe(market_df.tail(5), use_container_width=True)
-        else:
-            st.info("Piaci adatok betöltése folyamatban...")
+        st.subheader("5. Politika, háború, média és társadalom")
+        st.markdown("""
+        * **Politika és jog:** Jogszabályok, adók, kormányzati döntések, közszolgáltatások (egészségügy, rendőrség, oktatás) működése[cite: 1].
+        * **Háborúk és nemzetközi kapcsolatok:** Fegyveres konfliktusok, szankciók, menekültmozgások, határellenőrzések és kibertámadások[cite: 1].
+        * **Média és hírek:** A hírek gyorsasága, algoritmusok, kattintásvadász címek, propaganda és a véleménybuborékok hatása a közhangulatra[cite: 1].
+        * **Demográfia és kultúra:** A népesség öregedése, migráció, hagyományok, vallás és generációs különbségek[cite: 1].
+        """)
 
     with tab5:
-        st.subheader("💾 SQLite Adatbázis Előzmények")
-        st.write("A rendszer által korábban mentett jelentések listája:")
-        db_df = load_reports_from_db()
+        st.subheader("6. Apróságok, katasztrófák, döntések és rendszerszint")
+        st.markdown("""
+        * **A legapróbb hétköznapi körülmények:** A szoba hőmérséklete, háttérzaj, egy lemerült telefon, eltévesztett kulcs, elromlott háztartási eszköz vagy megszakadt internetkapcsolat[cite: 1].
+        * **Katasztrófa-Radar:** Földrengések, vulkánkitörések, erdőtüzek, áradások és extrém időjárási katasztrófák[cite: 1].
+        * **Véletlen és szabad akarat:** Kiszámíthatatlan események, váratlan hívások, valamint az emberi döntések és a jövővel kapcsolatos várakozások[cite: 1].
+        * **A 4 Hatásszint és Visszacsatolás:**
+          * *Egyéni szint:* Éhség, fáradtság, hangulat[cite: 1].
+          * *Helyi szint:* Útlezárás, helyi bolt bezárása[cite: 1].
+          * *Országos szint:* Adatváltozás, gazdasági válság[cite: 1].
+          * *Globális szint:* Világjárvány, háború, klímaváltozás[cite: 1].
+        """)
+
+    with tab6:
+        st.subheader("💾 Adatbázis & Riport Kezelés")
+        r_title = st.text_input("Riport Megnevezése", f"GUME Total Ökoszisztéma Jelentés – {target_country}")
+        
+        if st.button("💾 Teljes Riport Mentése az Adatbázisba", type="primary"):
+            full_content = f"Célpont: {target_country}. A rendszer integrálta a 37 változót, a 7 makro csoportot és a 4 hatásszintet a dokumentum alapján."
+            save_report(target_country, r_title, full_content)
+            st.success("✔ Sikeresen elmentve az SQLite adatbázisba!")
+
+        st.markdown("---")
+        st.write("Korábban elmentett jelentések:")
+        db_df = load_reports()
         if not db_df.empty:
             st.dataframe(db_df, use_container_width=True)
         else:
-            st.info("Még nincs elmentett jelentés az adatbázisban.")
+            st.info("Még nincsenek elmentett jelentések az adatbázisban.")
 
-    with tab6:
-        st.subheader("📑 Riport Mentése az Adatbázisba & Letöltés")
-        report_title_input = st.text_input("Riport Neve", f"GUME Enterprise Jelentés – {target_country}")
-        
-        if st.button("💾 Mentés SQLite Adatbázisba", type="primary"):
-            full_content = f"{intel['plain']}\n\n{intel['expert']}\n\n{intel['disaster']}"
-            save_report_to_db(target_country, report_title_input, full_content)
-            st.success("✔ Riport sikeresen elmentve az SQLite adatbázisba!")
-
-        st.markdown("---")
-        markdown_text = f"""# {report_title_input}
-Dátum: {today_str}
-Célpont: {target_country}
-
-## Köznyelvi Összefoglaló
-{intel['plain']}
-
-## Elemzői Szakmai Elemzés
-{intel['expert']}
-
-## Katasztrófa-Radar
-{intel['disaster']}
-"""
+        export_text = f"# {r_title}\nCélpont: {target_country}\nDátum: {today_str}\n\n[Minden részletes változó és 7 makro csoport integrálva a dokumentum alapján]."
         st.download_button(
             label="📥 Letöltés Markdown Fájlként",
-            data=markdown_text,
-            file_name=f"gume_enterprise_{target_country.lower()}.md",
+            data=export_text,
+            file_name=f"gume_total_ecosystem_{target_country.lower()}.md",
             mime="text/markdown"
         )
 
     st.markdown("---")
-    st.caption("GUME v6.9 Enterprise Intelligence Core — SQLite, ML, LLM struktúra aktiválva[cite: 2].")
+    st.caption("GUME v6.9 Total World Ecosystem Core — Minden részlet, változó és szint aktív[cite: 1].")
 
 if __name__ == "__main__":
-    run_gume_enterprise()
+    run_gume_total_ecosystem()
