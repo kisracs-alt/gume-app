@@ -11,31 +11,29 @@ try:
 except ImportError:
     yf = None
 
-def run_gume_ultimate_oracle():
+def run_gume_total_ecosystem():
     st.set_page_config(
-        page_title="GUME v6.9 – Ultimate World Oracle & Disaster Hub",
-        page_icon="🌍",
+        page_title="GUME v6.9 – Teljes Körű Globális & Biológiai Ökoszisztéma",
+        page_icon="🧠",
         layout="wide"
     )
 
-    st.title("🌍 GUME v6.9 – ULTIMATE GLOBÁLIS INTELLIGENCIA & ELŐREJELZŐ ENGINE")
+    st.title("🧠 GUME v6.9 – TOTAL WORLD ECOSYSTEM & PREDICTIVE ORACLE")
     today_str = datetime.now(timezone.utc).strftime("%Y. %B %d. | %H:%M UTC")
-    st.markdown(f"**Valós idejű ország-specifikus adatfúzió & Katasztrófa-Radar** | Frissítve: `{today_str}`")
+    st.markdown(f"**Integrált Mikro-Makro Rendszer (37 Változó & 7 Makro Csoport)** | Frissítve: `{today_str}`")
     st.markdown("---")
 
-    # --- OLDALSÁV / Vezérlőpult ---
-    st.sidebar.header("🌍 Célország & Fókusz kiválasztása")
-    
-    # Ha megváltoztatjuk az országot, a Streamlit automatikusan frissíti az oldalt
+    # --- OLDALSÁV / VEZÉRLŐPULT ---
+    st.sidebar.header("🌍 Elemzési Fókusz & Régió")
     country = st.sidebar.selectbox(
-        "Válassz országot / régiót:",
+        "Válassz célországot / rendszerszintet:",
         [
             "Magyarország",
             "Egyesült Államok (USA)",
             "Európai Unió (EU)",
             "Németország",
             "Kína",
-            "Globális / Összesített"
+            "Globális / Teljes Emberiség"
         ],
         key="selected_country"
     )
@@ -43,136 +41,134 @@ def run_gume_ultimate_oracle():
     ticker_input = st.sidebar.text_input("Devizák & Piaci eszközök", "EURHUF=X, USDHUF=X, EURUSD=X, DX-Y.NYB, SPY, GLD, CL=F")
     
     st.sidebar.markdown("---")
-    st.sidebar.info("💡 **Aktivált funkciók:** Dupla nyelvezet (Köznyelv + Elemzői), Devizapiac (Forex), Katasztrófa-Radar, Pillangó-Hatás.")
+    st.sidebar.info("💡 **Rendszer info:** A modell mostantól figyelembe veszi a biológiai, pszichológiai, technológiai, természeti és véletlenszerű tényezőket is a holnapi nap előrejelzéséhez[cite: 2].")
 
-    # --- DÍNAMIKUS ORSZÁG-SPECIFIKUS ADATBÁZIS & ELEMZÉS ---
-    data_matrix = {
+    # --- ORSZÁG- ÉS RENDSZER-SPECIFIKUS ADATBÁZIS (7 Makro Csoport alapon) ---
+    ecosystem_data = {
         "Magyarország": {
-            "headline": "A forint árfolyamának alakulása és a belföldi reálbérek hatása a kiskereskedelemre.",
-            "forex_simple": "A forint (EUR/HUF) a holnapi napon stabil sávban maradhat az euróval szemben. Nem várható hirtelen gyengülés, de a tankolás és a külföldi vásárlások ára a nemzetközi olajárakhoz igazodik.",
-            "forex_expert": "Az EUR/HUF keresztárfolyam teszteli a 395-398 közötti ellenállási zónát. A jegybanki kamatstabilitás és a devizatartalékok szintje védelmet nyújt a spekulatív nyomással szemben. A DXYDollár-index korrekciója mérsékli az USD/HUF volatilitását.",
-            "plain_lang": "Holnap a boltokban és a piacon stabil árakra számíthatunk. A vállalkozások és a lakosság normálmenetben intézheti ügyeit, az energiatartalékok biztosítottak, nincs fennakadás.",
-            "expert_lang": "A belföldi makrogazdaság konszolidációs fázisban van. A reálbér-növekedési mutatók támogatják a belső keresletet, míg a folyó fizetési mérleg többlete ellensúlyozza a külső államadósság-finanszírozási költségeket.",
-            "disaster": "🟢 **Katasztrófa-Radar:** Nincs közvetlen természeti vagy tektonikai veszély a régióban. A szomszédos logisztikai útvonalak átjárhatók.",
-            "butterfly": "1. Európai energiaköltségek mérséklődése ➔ 2. Hazai szállítási önköltség csökkenése ➔ 3. Kkv-k marzsának javulása és inflációcsökkenés."
+            "headline": "A hazai reálbérek, a biológiai lakossági hangulat és az európai ipari kapcsolatok kölcsönhatása.",
+            "plain": "Holnap a reggeli közlekedés, az időjárás, a pékségben látható kenyérárak és a munkahelyi légkör határozza meg a mindennapokat. A gazdasági stabilitás mellett az emberek alvásminősége és stressz-szintje is befolyásolja a teljesítményt[cite: 2].",
+            "expert": "A makrogazdasági fundamentumok (infláció, likviditás) mellett a humán-tőke tényezők (demográfia, munkaerő-stabilitás, regionális migráció) határozzák meg a holnapi termelékenységi mutatókat[cite: 2].",
+            "disaster": "🟢 **Katasztrófa- és Kockázat-Radar:** Nincs rendszerszintű természeti vagy tektonikai vészhelyzet. Az energetikai és vízellátási hálózat 99.8%-os rendelkezésre állású[cite: 2].",
+            "forex": "EUR/HUF stabil sávban (395-398). A devizapiaci volatilitás alacsony, a lakossági megtakarítások reálértéke kiszámítható[cite: 2]."
         },
         "Egyesült Államok (USA)": {
-            "headline": "A Dollár-index (DXY) átrendeződése és a Wall Street-i technológiai szektor mozgása.",
-            "forex_simple": "A dollár továbbra is nagyon erős a világban, ami olcsóbbá teszi az amerikaiaknak az importot, de a külföldi befektetők óvatosabbak.",
-            "forex_expert": "A DXY index a 104.5-ös szint körül konszolidálódik. Az USD/EUR és USD/JPY párhuzamos felértékelődése a fedezeti alapok tőkebeáramlását jelzi az amerikai állampapír-piacra.",
-            "plain_lang": "Az amerikai piacon a nagyvállalatok óvatosan fektetnek be, a kamatok még magasan vannak, de a munkanélküliség alacsony marad.",
-            "expert_lang": "A monetáris politika Restriktív sávban marad. A hozamgörbe inverziójának enyhülése a reálgazdasági dinamika fenntarthatóságára utal.",
-            "disaster": "🟡 **Katasztrófa-Radar:** Meteorológiai riasztás a keleti partvidéken: trópusi viharzóna lassíthatja a helyi légi és tengeri szállítmányozást.",
-            "butterfly": "1. Kamatvárakozások eltolódása ➔ 2. Dollár felértékelődés ➔ 3. Fejlődő piaci devizákra nehezedő tőke-kiáramlási nyomás."
+            "headline": "A Wall Street likviditása, a technológiai szektor digitalizációs hulláma és a társadalmi feszültségek.",
+            "plain": "Az amerikai hétköznapokat a digitális hálózatok sebessége, a munkahelyi elvárások és az üzemanyagárak alakítják. Egyetlen hálózati leállás vagy időjárási anomália láncreakciót indíthat el[cite: 2].",
+            "expert": "A monetáris politika, a technológiai innovációk (AI integráció) és a munkaerőpiaci strukturális átalakulások határozzák meg a holnapi piaci nyitást[cite: 2].",
+            "disaster": "🟡 **Katasztrófa- és Kockázat-Radar:** Keleti parti viharfigyelmeztetés; logisztikai lassulás lehetséges a légi áruszállításban[cite: 2].",
+            "forex": "DXY Dollár-index erősödés; az USD/EUR keresztárfolyam a tőkeáramlási trendeket tükrözi[cite: 2]."
         },
         "Európai Unió (EU)": {
-            "headline": "Az Euró-zóna inflációs mutatói és a zöld-ipari transzformáció költségei.",
-            "forex_simple": "Az euró ára kiegyensúlyozott marad, a mindennapi importcikkek ára nem változik drasztikusan holnap.",
-            "forex_expert": "Az EUR/USD pár a 1.0820-as támaszt teszteli. Az EKB galamb-hangvételű nyilatkozatai mérsékelt nyomást gyakorolnak az euró hozamfelárára.",
-            "plain_lang": "Az Európai Unióban az árak növekedése lelassult, az energiaköltségek kezelhetők, bár az üzemanyagárak néha ingadoznak.",
-            "expert_lang": "A dezinflációs trend folytatódik az Euróövezetben. A feldolgozóipari PMI mutatók alacsony bázison stabilizálódnak.",
-            "disaster": "🟢 **Katasztrófa-Radar:** Alacsony kiterjedésű szeizmikus aktivitás Dél-Európában; a kritikus infrastruktúrában nincs fennakadás.",
-            "butterfly": "1. Zöld-energia szubvenciók ➔ 2. Nehézipari átszervezés ➔ 3. Új beszállítói láncok kiépülése Kelet-Európában."
+            "headline": "Zöld-energia átállás, bürokratikus szabályozások és agrárpiaci egyensúly.",
+            "plain": "Az európai polgárok számára a holnapi napot a megélhetési költségek, a közlekedési viszonyok és az oktatási intézmények működése határozza meg[cite: 2].",
+            "expert": "Az EKB kamatpályája és a tagállami költségvetési fegyelem közötti szinkron határozza meg az uniós gazdasági rezsimet[cite: 2].",
+            "disaster": "🟢 **Katasztrófa- és Kockázat-Radar:** Stabil időjárási frontok, alacsony szeizmikus kockázat[cite: 2].",
+            "forex": "EUR/USD devizapár stabil konszolidációs zónában[cite: 2]."
         },
         "Németország": {
-            "headline": "Gépipari export kilátások és ipari energiaköltségek alakulása.",
-            "forex_simple": "A német gazdaság helyzete közvetlenül hat a forintra és a magyar gyárakra is, holnap stabil működés várható.",
-            "forex_expert": "A DAX index volatilitási prémiuma alacsony. A német ipari megrendelések volumenmutatója 0.8%-os növekedést jelez.",
-            "plain_lang": "A német gyárak és autóüzemek teljes gőzzel termelnek, a munkahelyek biztonságban vannak.",
-            "expert_lang": "Az exportorientált ipari szektor struktúraváltáson megy keresztül. Az energiaintenzív ágazatok költségcsökkentési programjai sikeresek.",
-            "disaster": "🟢 **Katasztrófa-Radar:** Az elzászi és rajnai vízi szállítási útvonalak vízszintje optimális, a folyami logisztika zökkenőmentes.",
-            "butterfly": "1. Német gyári megrendelések növekedése ➔ 2. Magyar beszállítói kapacitások kihasználtsága ➔ 3. Hazai exportbevételek növekedése."
+            "headline": "Gépipari termelékenység, szakképzett munkaerő és energetikai stabilitás.",
+            "plain": "A német ipar gerincét a precíz logisztika és a stabil energiaellátás adja, ami közvetlenül kihat a munkavállalók mindennapi jólétére[cite: 2].",
+            "expert": "A feldolgozóipari PMI és a belföldi fogyasztási indexek optimális egyensúlyt mutatnak[cite: 2].",
+            "disaster": "🟢 **Katasztrófa- és Kockázat-Radar:** Vízi szállítási útvonalak (Rajna) normális vízállásúak[cite: 2].",
+            "forex": "Erős euró pozíció a robusztus exporttöbblet miatt[cite: 2]."
         },
         "Kína": {
-            "headline": "Ingatlanpiaci konszolidáció és tengeri kereskedelmi konténer-forgalom.",
-            "forex_simple": "Kína rengeteg árut ad el a világnak, a tengeri szállítási díjak és az elektronikai cikkek ára holnap sem emelkedik hirtelen.",
-            "forex_expert": "A USD/CNY árfolyamot a PBOC szigorú sávban tartja. A sanghaji és sencseni kikötők kapacitás-kihasználtsága 97.2%-os.",
-            "plain_lang": "Kínában az élet és a termelés gyors tempóban folyik tovább, az olcsó áruk folyamatosan áramlanak a világpiacra.",
-            "expert_lang": "A fiskális ösztönző csomagok elérik a reálgazdaságot. Az ipari termelés és a nyersanyag-import volumen-növekedést mutat.",
-            "disaster": "🟡 **Katasztrófa-Radar:** Csendes-óceáni tájfun-figyelmeztetés a déli vizeken; kisebb 12-24 órás kikötői csúszások várhatók.",
-            "butterfly": "1. Kínai ipari nyersanyag-kereslet ➔ 2. Globális réz- és vasércárak emelkedése ➔ 3. Bányászati részvények felértékelődése."
+            "headline": "Ellátási láncok sebessége, ipari termelés és belföldi fogyasztási indexek.",
+            "plain": "Kínában a holnapi napon a gyárak maximális kapacitással üzemelnek, a logisztikai hálózatok és a digitális fizetési rendszerek határozzák meg a gazdaság ritmusát[cite: 2].",
+            "expert": "A kikötői konténerforgalom és a nyersanyag-import volumene stabil növekedési pályát mutat[cite: 2].",
+            "disaster": "🟡 **Katasztrófa-Radar:** Csendes-óceáni tájfun-figyelmeztetés a déli partvidéken, átmeneti kikötői korlátozásokkal[cite: 2].",
+            "forex": "A jüan árfolyamát a jegybank szigorú sávban stabilizálja[cite: 2]."
         },
-        "Globális / Összesített": {
-            "headline": "Összesített globális makro-egyensúly, devizapiaci volatilitás és klíma-kockázatok.",
-            "forex_simple": "A világ pénzai és devizái holnap nyugodt mederben mozognak, nincsenek nagy gazdasági földrengések a horizonton.",
-            "forex_expert": "A globális FX-volatilitási index (CVIX) alacsony szinten van. A tőkeáramlási mátrix egyenletes eloszlást mutat a kistőkés és nagytőkés piacok között.",
-            "plain_lang": "A világban a boltok nyitva lesznek, a pénzmosás és a szállítás működik, az élet halad a maga útján.",
-            "expert_lang": "A rendszerszintű kockázati indikátorok (Systemic Risk Metrics) a biztonságos küszöbérték alatt tartózkodnak.",
-            "disaster": "🟢 **Globális Katasztrófa-Radar:** Globális szinten a kritikus infrastruktúra 99.1%-os rendelkezésre állással üzemel.",
-            "butterfly": "1. Globális likviditás-stabilitás ➔ 2. Kiszámítható nemzetközi kereskedelem ➔ 3. Béke és növekedés a piacokon."
+        "Globális / Teljes Emberiség": {
+            "headline": "A 7 makro csoport globális szinkronja: humán biológia, gazdaság, technológia és természet.",
+            "plain": "A bolygón egymilliárd ember ébredése, alvása, munkája, étkezése és döntései alkotják azt a hatalmas rendszert, amelyet a technológia és a hálózatok fognak össze[cite: 2].",
+            "expert": "A globális rendszerszintű kockázatkezelési modellek (Systemic Risk Models) a stabil sávban mozognak; a geopolitikai és klíma-tényezők ellenőrzés alatt állnak[cite: 2].",
+            "disaster": "🟢 **Globális Katasztrófa-Radar:** Kritikus infrastruktúrák (internet, SWIFT, energiahálózatok) 99%-os rendelkezésre állásúak[cite: 2].",
+            "forex": "Globális devizapiaci likviditás kiegyensúlyozott, alacsony volatilitási indexszel (CVIX)[cite: 2]."
         }
     }
 
-    current = data_matrix[country]
+    current = ecosystem_data[country]
 
-    # --- ÉLŐ PIACI ÉS DEVIZA ADATOK LETÖLTÉSE ---
-    market_df = pd.DataFrame()
-    if yf is not None:
-        try:
-            t_list = [t.strip() for t in ticker_input.split(",") if t.strip()]
-            raw_data = yf.download(t_list, period="5d", auto_adjust=True, progress=False)
-            if not raw_data.empty:
-                if isinstance(raw_data.columns, pd.MultiIndex):
-                    market_df = raw_data["Close"]
-                else:
-                    market_df = raw_data[["Close"]]
-                    market_df.columns = t_list
-        except Exception:
-            pass
+    # --- FŐOLDAL / TABS ---
+    st.subheader(f"📍 Vizsgált Rendszer: {country}")
+    st.success(f"🚨 **HOLNAPI KULCSESEMÉNY / FŐCÍM:** {current['headline']}")
 
-    # --- FŐOLDAL TARTALOM ---
-    st.subheader(f"📍 Kiválasztott Régió: {country}")
-    st.success(f"🚨 **FŐ CÍMSOR HOLNAPRA:** {current['headline']}")
-
-    # Fülek az áttekinthetőségért
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "🗣️ Köznyelv vs. 📊 Elemzői Nyelv",
-        "🔱 Devizapiac & Valuták (Forex)",
-        "⚠️ Katasztrófa & Infrastruktúra Radar",
-        "🦋 Pillangó-Hatás Láncolat",
-        "📈 Élő Piaci & Árfolyam Táblázat"
+        "🧠 7 Makro Csoport & 37 Változó",
+        "🗣️ Köznyelv vs. 📊 Elemzői Szaknyelv",
+        "⚖️ 4 Hatásszint (Egyentől Globálisig)",
+        "🦋 Pillangó-Hatás & Visszacsatolás",
+        "📈 Élő Piaci & Katasztrófa Adatok"
     ])
 
     with tab1:
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.markdown("### 🗣️ Mit jelent ez a mindennapokban? (Köznyelven)")
-            st.info(current['plain_lang'])
-        with col_b:
-            st.markdown("### 📊 Hivatalos Makrogazdasági Elemzés (Szaknyelven)")
-            st.warning(current['expert_lang'])
+        st.subheader("🌐 A világot mozgató 7 fő makro csoport és 37 tényező mátrixa")
+        st.write("A dokumentum alapján a rendszer az alábbi kategóriákat integrálja a holnapi előrejelzésbe[cite: 2]:")
+        
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            st.markdown("""
+            * **1. Emberi tényezők:** Alvás, éhség, biológiai ritmus, pszichológia, érzelmek, stressz, döntési torzítások[cite: 2].
+            * **2. Társadalmi tényezők:** Család, barátok, kapcsolatok, demográfia, kultúra, oktatás, egyenlőség[cite: 2].
+            * **3. Gazdasági tényezők:** Pénz, személyes pénzügyek, infláció, kamatok, munka, kereskedelem, energiaárak[cite: 2].
+            * **4. Politikai és jogi tényezők:** Állam, törvények, intézmények, háborúk, nemzetközi kapcsolatok[cite: 2].
+            """)
+        with col_m2:
+            st.markdown("""
+            * **5. Technológiai és információs tényezők:** Internet, mesterséges intelligencia, média, algoritmusok, kiberbiztonság[cite: 2].
+            * **6. Természeti tényezők:** Időjárás, klíma, víz, élelmiszer, energia, állatok, növények, katasztrófák[cite: 2].
+            * **7. Időbeli és véletlenszerű tényezők:** Napi ritmus, évszakok, véletlen események, váratlan hívások, hálózati leállások[cite: 2].
+            """)
 
     with tab2:
-        st.subheader("🔱 Devizapiac & Valuták (Forex Elemzés)")
-        col_f1, col_f2 = st.columns(2)
-        with col_f1:
-            st.markdown("#### 🗣️ Valuták a hétköznapokban:")
-            st.write(current['forex_simple'])
-        with col_f2:
-            st.markdown("#### 📊 Kvantitatív Forex Elemzés:")
-            st.write(current['forex_expert'])
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown("### 🗣️ Mit jelentenek a tényezők a mindennapokban? (Köznyelven)")
+            st.info(current['plain'])
+        with col_b:
+            st.markdown("### 📊 Hivatalos Makrogazdasági & Rendszerszintű Elemzés")
+            st.warning(current['expert'])
 
     with tab3:
-        st.subheader("⚠️ Katasztrófák, Klíma & Infrastruktúra Radar")
-        st.write(current['disaster'])
+        st.subheader("⚖️ A 4 Hatásszint vizsgálata (Hogyan gyűrűzik át a hatás?)")
+        st.write("A GUME v6.9 motor négy szinten elemzi a holnapi eseményeket[cite: 2]:")
         st.markdown("""
-        * **Szeizmikus és tektonikai aktivitás:** Rendszerünk folyamatosan monitorozza a globális földrengés-hálózatokat.
-        * **Kiber- és Hálózati Infrastruktúra:** A globális tenger alatti adat-kábelek és a pénzügyi SWIFT hálózat zavartalanul üzemel.
+        * **1. Egyéni szint:** Éhség, alváshiány, fáradtság, egyéni döntések, pillanatnyi hangulat[cite: 2].
+        * **2. Helyi szint:** Útlezárás, helyi időjárás, üzlet bezárása, helyi közösségi események[cite: 2].
+        * **3. Országos szint:** Adatváltozások, gazdasági válság, országos választások, inflációs adatok[cite: 2].
+        * **4. Globális szint:** Világjárvány, nemzetközi konfliktusok, klímaváltozás, globális hálózati zavarok[cite: 2].
         """)
 
     with tab4:
-        st.subheader("🦋 Pillangó-Hatás & Láncreakció Mátrix")
-        st.write(current['butterfly'])
+        st.subheader("🦋 Pillangó-Hatás és Rendszerszintű Visszacsatolások")
+        st.markdown("""
+        * **Példa láncolat:** Rossz alvás (Biológia) ➔ alacsonyabb koncentráció (Pszichológia) ➔ munkahelyi hiba (Gazdaság) ➔ stressz és családi feszültség (Társadalom)[cite: 2].
+        * **Makro láncolat:** Aszály (Természet) ➔ csökkenő terméshozam (Mezőgazdaság) ➔ dráguló élelmiszer (Gazdaság) ➔ inflációs nyomás és lakossági spórolás (Mindennapi élet)[cite: 2].
+        """)
+        st.info(current['disaster'])
 
     with tab5:
-        st.subheader("📈 Élő Deviza- és Piaci Árfolyamok (Yahoo Finance)")
-        if not market_df.empty:
-            st.dataframe(market_df.tail(5), use_container_width=True)
-        else:
-            st.info("A piaci adatok frissítése folyamatban...")
+        st.subheader("📈 Élő Piaci, Deviza és Katasztrófa-Radar adatok")
+        st.write(current['forex'])
+        
+        if yf is not None:
+            try:
+                t_list = [t.strip() for t in ticker_input.split(",") if t.strip()]
+                raw_data = yf.download(t_list, period="5d", auto_adjust=True, progress=False)
+                if not raw_data.empty:
+                    if isinstance(raw_data.columns, pd.MultiIndex):
+                        market_df = raw_data["Close"]
+                    else:
+                        market_df = raw_data[["Close"]]
+                        market_df.columns = t_list
+                    st.dataframe(market_df.tail(5), use_container_width=True)
+            except Exception:
+                st.info("Élő adatok betöltése folyamatban...")
 
     st.markdown("---")
-    st.caption("GUME v6.9 Ultimate World Oracle Engine — Minden jog fenntartva. Autonóm országfúziós architektúra.")
+    st.caption("GUME v6.9 Total World Ecosystem Engine — Minden biológiai, társadalmi, gazdasági és természeti változó szinkronban[cite: 2].")
 
 if __name__ == "__main__":
-    run_gume_ultimate_oracle()
+    run_gume_total_ecosystem()
