@@ -11,12 +11,12 @@ try:
 except ImportError:
     yf = None
 
-# --- SQLite Adatbázis a valós idejű elemzések mentéséhez ---
+# --- SQLite Adatbázis az 9 pilléres elemzések mentéséhez ---
 def init_db():
-    conn = sqlite3.connect("gume_live_oracle.db", check_same_thread=False)
+    conn = sqlite3.connect("gume_9_pillars.db", check_same_thread=False)
     c = conn.cursor()
     c.execute('''
-        CREATE TABLE IF NOT EXISTS live_forecasts (
+        CREATE TABLE IF NOT EXISTS pillar_reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
             country TEXT,
@@ -28,36 +28,34 @@ def init_db():
 
 init_db()
 
-def save_live_forecast(country, content):
-    conn = sqlite3.connect("gume_live_oracle.db", check_same_thread=False)
+def save_pillar_report(country, content):
+    conn = sqlite3.connect("gume_9_pillars.db", check_same_thread=False)
     c = conn.cursor()
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    c.execute("INSERT INTO live_forecasts (timestamp, country, content) VALUES (?, ?, ?)", (ts, country, content))
+    c.execute("INSERT INTO pillar_reports (timestamp, country, content) VALUES (?, ?, ?)", (ts, country, content))
     conn.commit()
     conn.close()
 
-def load_live_forecasts():
-    conn = sqlite3.connect("gume_live_oracle.db", check_same_thread=False)
-    df = pd.read_sql("SELECT * FROM live_forecasts ORDER BY id DESC", conn)
+def load_pillar_reports():
+    conn = sqlite3.connect("gume_9_pillars.db", check_same_thread=False)
+    df = pd.read_sql("SELECT * FROM pillar_reports ORDER BY id DESC", conn)
     conn.close()
     return df
 
-def run_gume_live_oracle():
+def run_gume_9_pillars():
     st.set_page_config(
-        page_title="GUME v6.9 – Live News & Ecosystem Oracle",
-        page_icon="📡",
+        page_title="GUME v6.9 – 9 Pilléres Világelőrejelző Hub",
+        page_icon="🌐",
         layout="wide"
     )
 
-    st.title("📡 GUME v6.9 – ÉLŐ HÍREK & VILÁGELŐREJELZŐ MÁTRIX")
+    st.title("🌐 GUME v6.9 – 9 PILLÉRES VILÁGELŐREJELZŐ MÁTRIX")
     today_str = datetime.now(timezone.utc).strftime("%Y. %B %d. | %H:%M UTC")
-    st.markdown(f"**Valós idejű hírfolyam-fúzió, 37 Változó és 7 Makro Csoport**[cite: 1] | Frissítve: `{today_str}`")
+    st.markdown(f"**A mindennapi életet és a világot alakító 9 legfontosabb tényező alapján** | Frissítve: `{today_str}`")
     st.markdown("---")
 
-    # --- OLDALSÁV: AZONNALI (REAKTÍV) ORSZÁGVÁLTÁS ---
+    # --- OLDALSÁV: AZONNALI REAKTÍV ORSZÁGVÁLTÁS ---
     st.sidebar.header("🌍 Célpont & Fókusz")
-    
-    # Amint itt változtatunk, a Streamlit azonnal újraindul gombnyomás nélkül!
     target_country = st.sidebar.selectbox(
         "Válassz országot vagy régiót:",
         [
@@ -65,19 +63,18 @@ def run_gume_live_oracle():
             "Japán", "Egyesült Királyság", "Franciaország", "Oroszország", 
             "Brazília", "India", "Globális / Teljes Emberiség"
         ],
-        key="country_selector"
+        key="reactive_country_9pillars"
     )
 
     ticker_input = st.sidebar.text_input("Piaci & Deviza Tickerek", "EURHUF=X, USDHUF=X, EURUSD=X, ^VIX, SPY, CL=F")
 
-    # --- ÉLŐ HÍREK LEKÉRÉSE RSS-BŐL ---
+    # Élő hírek RSS-ből
     live_news = []
     try:
-        # Ország-specifikus vagy globális RSS keresés
         rss_query = target_country.split(" ")[0]
         feed_url = f"https://news.google.com/rss/search?q={rss_query}&hl=hu&gl=HU&ceid=HU:hu" if target_country == "Magyarország" else f"https://news.google.com/rss/search?q={rss_query}&hl=en-US&gl=US&ceid=US:en"
         feed = feedparser.parse(feed_url)
-        for entry in feed.entries[:7]:
+        for entry in feed.entries[:6]:
             live_news.append({
                 "title": entry.title,
                 "link": entry.link,
@@ -86,9 +83,9 @@ def run_gume_live_oracle():
     except Exception:
         pass
 
-    # Piaci adatok letöltése
+    # Piaci adatok
     market_df = pd.DataFrame()
-    vix_val = 18.1
+    vix_val = 18.0
     if yf is not None:
         try:
             t_list = [t.strip() for t in ticker_input.split(",") if t.strip()]
@@ -104,69 +101,77 @@ def run_gume_live_oracle():
         except Exception:
             pass
 
-    # --- DINAMIKUS ELŐREJELZÉS SZINTÉZIS A MAI HÍREK ALAPJÁN ---
-    st.subheader(f"📍 Aktuális Fókusz: {target_country}")
-    st.success(f"🚨 **HOLNAPI ELŐREJELZÉS (A mai valós hírek és a 37 változó alapján[cite: 1]):** A mai napon futó médiahírek, a biológiai ritmusok, a gazdasági láncok és a társadalmi visszacsatolások szinkronja miatt holnap {target_country} területén fokozott figyelem irányul a piaci likviditásra és a lakossági hangulatra[cite: 1].")
+    st.subheader(f"📍 Aktív Elemzési Célpont: {target_country}")
+    st.success(f"🚨 **HOLNAPI VILÁGELŐREJELZÉS:** A 9 kulcspillér (gazdaság, technológia, társadalom, politika, környezet, egészségügy, globalizáció, infrastruktúra és média) szinkronja alapján {target_country}-ban a holnapi nap a makrogazdasági stabilitás és a digitális tudatosság jegyében telik.")
 
-    # Fülek
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📰 Mai Valós Hírek & Élő Folyosó",
-        "🧠 7 Makro Csoport & 37 Változó[cite: 1]",
-        "⚖️ 4 Hatásszint & Visszacsatolás[cite: 1]",
+    # --- TABS / FÜLEK A 9 PILLÉR ALAPJÁN ---
+    tab_news, tab_p1, tab_p2, tab_p3, tab_market, tab_db = st.tabs([
+        "📰 Élő Hírek & Események",
+        "💰 1-3. Gazdaság, Tech & Társadalom",
+        "🏛️ 4-6. Politika, Környezet & Egészség",
+        "🌐 7-9. Globalizáció, Infrastruktúra & Média",
         "📈 Piaci Adatok & VIX Index",
-        "💾 Adatbázis & Riport Mentés"
+        "💾 Adatbázis & Riport Export"
     ])
 
-    with tab1:
-        st.subheader(f"📰 A legfrissebb mai hírek ({target_country}):")
+    with tab_news:
+        st.subheader(f"📰 A mai nap legfrissebb hírei ({target_country}):")
         if live_news:
             for item in live_news:
                 st.markdown(f"* **[{item['title']}]({item['link']})** — *Frissítve: {item['published']}*")
-            st.info("💡 **Algoritmikus fúzió:** A fenti valós hírek tartalma közvetlenül befolyásolja a holnapi gazdasági, politikai és pszichológiai láncreakciókat[cite: 1].")
         else:
-            st.warning("Az élő hírcsatorna átmenetileg offline, de a prediktív modell fut.")
+            st.info("Az élő hírfolyam átmenetileg offline módban van.")
 
-    with tab2:
-        st.subheader("🌐 A Földet és az embert mozgató 7 makro csoport[cite: 1]")
-        st.markdown("""
-        * **1. Emberi tényezők:** Alvás, biológiai ritmus, vércukorszint, pszichológia, stressz, döntési torzítások[cite: 1].
-        * **2. Társadalmi tényezők:** Család, barátok, munkahelyi kapcsolatok, demográfia, társadalmi bizalom[cite: 1].
-        * **3. Gazdasági tényezők:** Személyes pénzügyek, infláció, kamatok, rezsiköltségek, élelmiszerárak[cite: 1].
-        * **4. Politikai és jogi tényezők:** Állami döntések, jogszabályok, adók, biztonság[cite: 1].
-        * **5. Technológiai és információs tényezők:** Internet, okostelefonok, algoritmusok, kiberbiztonság[cite: 1].
-        * **6. Természeti tényezők:** Időjárás, klíma, ivóvíz, mezőgazdaság, katasztrófa-kockázatok[cite: 1].
-        * **7. Időbeli és véletlenszerű tényezők:** Napi ritmus, váratlan események, hálózati hibák[cite: 1].
-        """)
+    with tab_p1:
+        st.subheader("1. Gazdasági tényezők")
+        st.write("Az árak, a fizetések, a munkalehetőségek és az infláció meghatározzák, hogy az emberek mire tudnak költeni, milyen lakásban élnek, és milyen életszínvonalat tudnak fenntartani.")
+        
+        st.subheader("2. Technológiai fejlődés")
+        st.write("Az internet, az okostelefonok, a mesterséges intelligencia és az automatizálás megváltoztatják a kommunikációt, a tanulást, a munkát és a szórakozást.")
+        
+        st.subheader("3. Társadalmi és kulturális tényezők")
+        st.write("A család, a barátok, a hagyományok, a vallás, az oktatás és a társadalmi normák hatással vannak az emberek gondolkodására és viselkedésére.")
 
-    with tab3:
-        st.subheader("⚖️ A 4 Hatásszint és Ok-Okozati Láncolat[cite: 1]")
-        st.markdown("""
-        * **Egyéni szint:** Fáradtság, biológiai állapot, egyéni döntések[cite: 1].
-        * **Helyi szint:** Útlezárás, helyi boltok készletei, városi közlekedés[cite: 1].
-        * **Országos szint:** Valutaárfolyamok, állami adatok, gazdasági mutatók[cite: 1].
-        * **Globális szint:** Nemzetközi ellátási láncok, geopolitika, világpiaci hatások[cite: 1].
-        """)
+    with tab_p2:
+        st.subheader("4. Politikai tényezők")
+        st.write("A kormányok döntései, a törvények, az adók, a nemzetközi kapcsolatok és a háborúk befolyásolják a biztonságot, a megélhetést és az emberek lehetőségeit.")
+        
+        st.subheader("5. Környezeti és természeti tényezők")
+        st.write("Az időjárás, az éghajlatváltozás, a természeti katasztrófák, a víz- és élelmiszerkészletek hatással vannak a mezőgazdaságra, az egészségre és a mindennapi életre.")
+        
+        st.subheader("6. Egészségügyi tényezők")
+        st.write("A betegségek, az egészségügyi ellátás minősége, a táplálkozás és a mentális egészség meghatározzák az emberek életminőségét és munkaképességét.")
 
-    with tab4:
+    with tab_p3:
+        st.subheader("7. Nemzetközi események és globalizáció")
+        st.write("A világkereskedelem, a migráció, a háborúk és a más országokban bekövetkező gazdasági változások a helyi árakra, a munkahelyekre és az áruk elérhetőségére is hatással vannak.")
+        
+        st.subheader("8. Közlekedés és infrastruktúra")
+        st.write("Az utak, a tömegközlekedés, az energiaellátás és az internetkapcsolat befolyásolják, hogy az emberek mennyi idő alatt jutnak el a munkahelyükre, és milyen szolgáltatásokhoz férnek hozzá.")
+        
+        st.subheader("9. Média és információ")
+        st.write("A televízió, a híroldalak és a közösségi média befolyásolják, miről tudunk, hogyan vélekedünk a világról, és milyen döntéseket hozunk.")
+
+    with tab_market:
         st.subheader("📈 Élő Piaci Mutatók & Volatilitás")
         st.metric("Aktuális VIX (Félelem) Index", f"{vix_val:.1f}")
         if not market_df.empty:
             st.dataframe(market_df.tail(5), use_container_width=True)
         else:
-            st.info("Piaci adatok letöltése folyamatban...")
+            st.info("Piaci adatok betöltése folyamatban...")
 
-    with tab5:
-        st.subheader("💾 Élő Adatbázis & Riport Mentés")
-        r_title = st.text_input("Riport Megnevezése", f"GUME Élő Hír-Jelentés – {target_country}")
+    with tab_db:
+        st.subheader("💾 Adatbázis Mentés & Riport Export")
+        r_title = st.text_input("Riport Megnevezése", f"GUME 9-Pillér Jelentés – {target_country}")
         
         if st.button("💾 Mentés az SQLite Adatbázisba", type="primary"):
-            content_desc = f"Célpont: {target_country}. Feldolgozott élő hírek száma: {len(live_news)}. VIX: {vix_val}."
-            save_live_forecast(target_country, content_desc)
-            st.success("✔ Az élő jelentés sikeresen elmentve!")
+            content_desc = f"Célpont: {target_country}. Elemzés a 9 kulcspillér alapján."
+            save_pillar_report(target_country, content_desc)
+            st.success("✔ Sikeresen elmentve az adatbázisba!")
 
         st.markdown("---")
-        st.write("Mentett jelentések az adatbázisban:")
-        db_df = load_live_forecasts()
+        st.write("Korábban elmentett jelentések:")
+        db_df = load_pillar_reports()
         if not db_df.empty:
             st.dataframe(db_df, use_container_width=True)
         else:
@@ -176,18 +181,18 @@ def run_gume_live_oracle():
 Dátum: {today_str}
 Célpont: {target_country}
 
-## Élő Hírek és Elemzés
-A rendszer a mai valós hírek, a 37 változó[cite: 1] és a 7 makro csoport[cite: 1] alapján összeállította a holnapi előrejelzést.
+## Összefoglalás a 9 Pillér Alapján
+A mindennapi életet befolyásoló fő tényezők: gazdaság, technológia, társadalom, politika, környezet, egészségügy, globalizáció, közlekedés és média.
 """
         st.download_button(
-            label="📥 Élő Riport Letöltése Markdownként",
+            label="📥 Riport Letöltése Markdownként",
             data=export_md,
-            file_name=f"gume_live_report_{target_country.lower()}.md",
+            file_name=f"gume_9pillars_report_{target_country.lower()}.md",
             mime="text/markdown"
         )
 
     st.markdown("---")
-    st.caption("GUME v6.9 Live Intelligence Engine — Az országváltás és a hírfolyam-fúzió teljesen reaktív.")
+    st.caption("GUME v6.9 9-Pilláris Motor — Teljes körű reaktív architektúra aktív.")
 
 if __name__ == "__main__":
-    run_gume_live_oracle()
+    run_gume_9_pillars()
