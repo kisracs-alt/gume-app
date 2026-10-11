@@ -12,11 +12,6 @@ try:
 except ImportError:
     yf = None
 
-try:
-    import openai
-except ImportError:
-    openai = None
-
 # --- SQLite Adatbázis inicializálás ---
 def init_db():
     conn = sqlite3.connect("gume_enterprise.db", check_same_thread=False)
@@ -56,7 +51,7 @@ def run_gume_enterprise():
         layout="wide"
     )
 
-    st.title("⚡ GUME v6.9 – ENTERPRISE GLOBAL INTELLIGENCE & ORACLE HUB")
+    st.title("⚡ GUME v6.9 – ENTERPRISE GLOBAL INTELLIGENCIA & ORACLE HUB")
     today_str = datetime.now(timezone.utc).strftime("%Y. %B %d. | %H:%M UTC")
     st.markdown(f"**Autonóm LLM Fúzió, ML Előrejelzés & SQLite Adatbázis** | Frissítve: `{today_str}`")
     st.markdown("---")
@@ -96,9 +91,8 @@ def run_gume_enterprise():
         except Exception:
             pass
 
-    # --- 37 VÁLTOZÓ & 7 MAKRO CSOPORT LOGIKA (Dinamikus generátor) ---
+    # --- 37 VÁLTOZÓ & 7 MAKRO CSOPORT LOGIKA ---
     def get_comprehensive_intelligence(country):
-        # Integrálja a dokumentum szerinti 7 makro csoportot, 37 változót és 4 hatásszintet[cite: 2]
         return {
             "title": f"Autonóm Előrejelzési Jelentés: {country} (Holnapi Nap)",
             "plain": f"Holnap {country} lakosainak mindennapjait a helyi időjárás, az alapvető élelmiszerárak, a közlekedési dugók és a munkahelyi stressz határozzák meg[cite: 2]. A biológiai ritmus (alvás, éberség) és a digitális eszközök (telefonok, internet) folyamatos visszacsatolásban alakítják a holnapi teljesítményt[cite: 2].",
@@ -174,7 +168,7 @@ def run_gume_enterprise():
         if not db_df.empty:
             st.dataframe(db_df, use_container_width=True)
         else:
-            St.info("Még nincs elmentett jelentés az adatbázisban.")
+            st.info("Még nincs elmentett jelentés az adatbázisban.")
 
     with tab6:
         st.subheader("📑 Riport Mentése az Adatbázisba & Letöltés")
@@ -190,7 +184,7 @@ def run_gume_enterprise():
 Dátum: {today_str}
 Célpont: {target_country}
 
-## Köznyövi Összefoglaló
+## Köznyelvi Összefoglaló
 {intel['plain']}
 
 ## Elemzői Szakmai Elemzés
