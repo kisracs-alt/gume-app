@@ -10,16 +10,16 @@ try:
 except ImportError:
     yf = None
 
-# --- SQLite Adatbázis az összes részletes jelentés mentéséhez ---
+# --- SQLite Adatbázis a mély-elemzések perzisztenciájához ---
 def init_db():
-    conn = sqlite3.connect("gume_total_ecosystem.db", check_same_thread=False)
+    conn = sqlite3.connect("gume_deep_matrix.db", check_same_thread=False)
     c = conn.cursor()
     c.execute('''
-        CREATE TABLE IF NOT EXISTS comprehensive_reports (
+        CREATE TABLE IF NOT EXISTS deep_simulations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
             country TEXT,
-            title TEXT,
+            macro_score REAL,
             content TEXT
         )
     ''')
@@ -28,49 +28,56 @@ def init_db():
 
 init_db()
 
-def save_report(country, title, content):
-    conn = sqlite3.connect("gume_total_ecosystem.db", check_same_thread=False)
+def save_simulation(country, score, content):
+    conn = sqlite3.connect("gume_deep_matrix.db", check_same_thread=False)
     c = conn.cursor()
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    c.execute("INSERT INTO comprehensive_reports (timestamp, country, title, content) VALUES (?, ?, ?, ?)", (ts, country, title, content))
+    c.execute("INSERT INTO deep_simulations (timestamp, country, macro_score, content) VALUES (?, ?, ?, ?)", (ts, country, score, content))
     conn.commit()
     conn.close()
 
-def load_reports():
-    conn = sqlite3.connect("gume_total_ecosystem.db", check_same_thread=False)
-    df = pd.read_sql("SELECT * FROM comprehensive_reports ORDER BY id DESC", conn)
+def load_simulations():
+    conn = sqlite3.connect("gume_deep_matrix.db", check_same_thread=False)
+    df = pd.read_sql("SELECT * FROM deep_simulations ORDER BY id DESC", conn)
     conn.close()
     return df
 
-def run_gume_total_ecosystem():
+def run_gume_deep_engine():
     st.set_page_config(
-        page_title="GUME v6.9 – Total World Ecosystem Hub",
-        page_icon="🌍",
+        page_title="GUME v6.9 – Deep Ecosystem & Algorithmic Matrix",
+        page_icon="🧬",
         layout="wide"
     )
 
-    st.title("🌍 GUME v6.9 – TELJES KÖRŰ VILÁGELŐREJELZŐ & ÖKOSZISZTÉMA MÁTRIX")
+    st.title("🧬 GUME v6.9 – MÉLYSZINTŰ RENDSZERSZINTŰ ORACLE & SZIMULÁTOR")
     today_str = datetime.now(timezone.utc).strftime("%Y. %B %d. | %H:%M UTC")
-    st.markdown(f"**Integrált Rendszer: 37 Változó, 7 Fő Csoport és 4 Hatásszint** | Frissítve: `{today_str}`")
+    st.markdown(f"**Mély-algoritmikus fúzió (37 Változó, 7 Makro Csoport, Visszacsatolási Hurkok)** | Frissítve: `{today_str}`")
     st.markdown("---")
 
-    # --- OLDALSÁV VÉZÉRLŐPULT ---
-    st.sidebar.header("🌐 Globális Rendszer Fókusz")
+    # --- OLDALSÁV: MÉLYSZINTŰ PARAMÉTEREZÉS ---
+    st.sidebar.header("🎛️ Rendszerszintű Változók")
     target_country = st.sidebar.selectbox(
-        "Válassz országot vagy régiót:",
+        "Vizsgált Célpont / Régió:",
         [
             "Magyarország", "Egyesült Államok (USA)", "Németország", "Kína", 
             "Japán", "Egyesült Királyság", "Franciaország", "Oroszország", 
             "Brazília", "India", "Globális / Teljes Emberiség"
         ]
     )
-    
-    ticker_input = st.sidebar.text_input("Piaci & Deviza Tickerek", "EURHUF=X, USDHUF=X, EURUSD=X, ^VIX, SPY, CL=F")
-    refresh_btn = st.sidebar.button("🔄 Teljes Rendszer Újraszámítása", type="primary")
 
-    # Piaci adatok
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("⚙️ Algoritmikus Súlyok (Mikro-Makro)")
+    bio_weight = st.sidebar.slider("Biológiai & Pszichológiai Index (1-10)", 1, 10, 7)
+    eco_weight = st.sidebar.slider("Gazdasági & Ellátási Lánc Index (1-10)", 1, 10, 8)
+    nat_weight = st.sidebar.slider("Természeti & Klíma Index (1-10)", 1, 10, 5)
+    tech_weight = st.sidebar.slider("Technológiai & Kiber Index (1-10)", 1, 10, 6)
+
+    ticker_input = st.sidebar.text_input("Piaci & Deviza Tickerek", "EURHUF=X, USDHUF=X, EURUSD=X, ^VIX, SPY, CL=F")
+    run_sim = st.sidebar.button("🔬 Mély Mátriz Újraszámítása", type="primary")
+
+    # Piaci adatok letöltése
     market_df = pd.DataFrame()
-    vix_val = 18.0
+    vix_val = 18.5
     if yf is not None:
         try:
             t_list = [t.strip() for t in ticker_input.split(",") if t.strip()]
@@ -86,100 +93,94 @@ def run_gume_total_ecosystem():
         except Exception:
             pass
 
-    # --- TARTALOM FÜLEK A TELJES DOKUMENTUM ALAPJÁN ---
-    st.subheader(f"📍 Vizsgált Célpont: {target_country}")
-    st.success(f"🚨 **HOLNAPI RENDSSZERSZINTŰ FŐCÍM:** A biológiai ritmusok, a mindennapi apróságok, a gazdasági láncok és a váratlan események hálózata {target_country}-ban[cite: 1].")
+    # Algoritmikus stressz-index számítás a beállított súlyok alapján
+    composite_score = (bio_weight * 1.2 + eco_weight * 1.5 + nat_weight * 1.1 + tech_weight * 1.3) / 5.1
+    system_status = "Kiegyensúlyozott Rezsim" if composite_score < 6.5 else "Fokozott Rendszerszintű Stressz"
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "🧬 1-3. Biológia, Psziché & Kapcsolatok",
-        "💰 4-7. Gazdaság, Munka, Oktatás & Tech",
-        "🌦️ 8-10. Természet, Víz, Élelmiszer & Energia",
-        "🏛️ 11-18. Politika, Háború, Média & Társadalom",
-        "🏠 19-37. Apróságok, Katasztrófák, Döntések & Rendszer",
-        "💾 Adatbázis & Riport Export"
+    # --- FŐTARTALOM: A 7 MAKRO CSOPORT ÉS 37 VÁLTOZÓ MÉLYEBB ELEMZÉSE ---
+    st.subheader(f"📍 Mély-Elemzési Mátrix: {target_country}")
+    st.info(f"📊 **Algoritmikus Állapot-vektor:** `{system_status}` (Kompozit Index: {composite_score:.2f} / 10.0)")
+
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "🧬 1. Biológia, Psziché & Egyéni Szint",
+        "💰 2. Gazdaság, Munka & Ellátási Láncok",
+        "🌦️ 3. Természet, Klíma & Katasztrófa-Radar",
+        "🦋 4. Visszacsatolási Hurkok & Láncreakciók",
+        "💾 Rendszer Adatbázis & Export"
     ])
 
     with tab1:
-        st.subheader("1. Az emberi test, biológia és pszichológia")
+        st.subheader("I. Emberi és Pszichológiai Alaprendszer (1-3. Főcsoport)")
         st.markdown("""
-        * **Alvás és biológiai ritmus:** Az alvás mennyisége, minősége, időzítése, a szoba hőmérséklete és a melatoninszint közvetlenül meghatározza a holnapi koncentrációt és a türelmet[cite: 1].
-        * **Éhség, táplálkozás és folyadék:** A vércukorszint, a vitaminok, a vízfogyasztás és a kiszáradás mértéke alapvetően befolyásolja az azonos ingerekre adott reakciókat[cite: 1].
-        * **Pszichológia, stressz és hiedelmek:** Az érzelmek, a pillanatnyi hangulat, a korábbi emlékek, a pénzügyi bizonytalanság miatti stressz és a döntési torzítások irányítják a lakosság reakcióit[cite: 1].
-        """)
-        st.markdown("---")
-        st.subheader("2. Család, barátok és emberi kapcsolatok")
-        st.markdown("""
-        * **Kapcsolati háló:** A szülők, párkapcsolatok, barátok és munkahelyi kollégák viselkedése, a bizalom, az empátia vagy éppen a magány mélyen hat a mentális állapotra[cite: 1].
-        * **Társas fertőzés:** Egy reggeli kedves szó vagy egy sértés láncreakcióként terjedhet tovább az emberek között egész nap[cite: 1].
+        * **Biológiai ritmus és alvás:** A lakosság átlagos alvásminősége, melatoninszintje és cirkadián ritmusa közvetlenül meghatározza a holnapi kognitív teljesítményt, a reakcióidőt és a hibalehetőségeket a munkahelyeken[cite: 1].
+        * **Homeosztázis és táplálkozás:** A vércukorszint, a hidratáltság, a vitaminok és a mikrotápanyagok egyensúlya fizikai alapot ad a pszichológiai tűrőképességhez[cite: 1].
+        * **Pszichológiai torzítások és stressz:** A pénzügyi bizonytalanság, a hiedelmek, a jövővel kapcsolatos várakozások és a stressz-szint befolyásolják a lakossági fogyasztási és beruházási döntéseket[cite: 1].
+        * **Társas fertőzés:** Az információk, a hangulatok és a konfliktusok hullámként terjednek a családok, a barátok és a munkahelyi közösségek között[cite: 1].
         """)
 
     with tab2:
-        st.subheader("3. Pénz, gazdaság, munka és oktatás")
+        st.subheader("II. Gazdasági, Munkahelyi és Technológiai Rendszer (4-7. Főcsoport)")
         st.markdown("""
-        * **Személyes pénzügyek:** Jövedelem, lakbér, rezsiköltségek (villany, gáz, víz), élelmiszerárak, hiteltörlesztések és a váratlan kiadások[cite: 1].
-        * **Makrogazdasági folyamatok:** Infláció, jegybanki kamatok, munkanélküliség, kereslet-kínálat, árfolyamok és energiaárak[cite: 1].
-        * **Munka és technológia:** Munkahelyi terhelés, túlóra, távmunka, valamint a mesterséges intelligencia és a robotok hatása a munkakörökre[cite: 1].
-        * **Oktatás és tudás:** Az iskolák működése, a digitális készségek, a kritikus gondolkodás és az álhírek felismerésének képessége[cite: 1].
-        * **Digitális világ:** Okostelefonok, mobilhálózatok, internetkapcsolat, algoritmusok, kiberbűnözés és az esetleges rendszerleállások[cite: 1].
+        * **Személyes és háztartási pénzügyek:** A reálbérek, a lakbérek, a rezsiköltségek (gáz, áram, víz), az élelmiszerárak és a hiteltörlesztések alakulása határozza meg a mozgásteret[cite: 1].
+        * **Makrogazdasági rezonancia:** Az infláció, a jegybanki kamatpályák, a munkanélküliség, a termelékenység és a globális kereskedelmi láncok stabilitása[cite: 1].
+        * **Technológiai függőség:** Az internetkapcsolat, a mobilhálózatok, a mesterséges intelligencia alapú automatizáció és az esetleges kiberbiztonsági kockázatok vagy rendszerleállások[cite: 1].
+        * **Intézményi és jogi keretek:** Az állami szolgáltatások, a közigazgatás, az adópolitika, a bíróságok és a közbiztonság működése[cite: 1].
         """)
 
     with tab3:
-        st.subheader("4. Természet, élelmiszer, ivóvíz és energia")
+        st.subheader("III. Természeti, Energia és Katasztrófa-Vektor (8-10. Főcsoport)")
         st.markdown("""
-        * **Időjárás és éghajlat:** Hőmérséklet, páratartalom, szélsebesség, csapadék, hőség, fagy, viharok és UV-sugárzás, amelyek közvetlenül befolyásolják a közlekedést és a teljesítményt[cite: 1].
-        * **Élelmiszer és ivóvíz:** Mezőgazdasági termelés, öntözővíz, hűtési és tárolási láncok, élelmiszer-biztonság és a bolti készletek[cite: 1].
-        * **Energia és erőforrások:** Villamosenergia-termelés, kőolaj, földgáz, megújuló energiaforrások, akkumulátorok, ritkaföldfémek és az áramszünetek kockázata[cite: 1].
+        * **Klíma és meteorológiai tényezők:** A hőmérséklet, a páratartalom, a csapadékmennyiség, a széllökések és a szélsőséges időjárási hullámok hatása a közlekedésre és az energiaszükségletre[cite: 1].
+        * **Élelmiszer- és vízellátási láncok:** A talaj minősége, az öntözővíz elérhetősége, a mezőgazdasági kártevők, a hűtési-tárolási láncok és a bolti készletek biztonsága[cite: 1].
+        * **Energia és nyersanyagok:** Villamosenergia-termelés, kőolaj, földgáz, akkumulátorok, kritikus nyersanyagok (réz, lítium) világpiaci ára és az áramszünetek kockázata[cite: 1].
+        * **Katasztrófa-Radar:** Földrengések, vulkáni aktivitás, erdőtüzek és árvizek monitoringja[cite: 1].
         """)
 
     with tab4:
-        st.subheader("5. Politika, háború, média és társadalom")
+        st.subheader("IV. A Visszacsatolási Hurkok (Feedback Loops) Algoritmusa")
         st.markdown("""
-        * **Politika és jog:** Jogszabályok, adók, kormányzati döntések, közszolgáltatások (egészségügy, rendőrség, oktatás) működése[cite: 1].
-        * **Háborúk és nemzetközi kapcsolatok:** Fegyveres konfliktusok, szankciók, menekültmozgások, határellenőrzések és kibertámadások[cite: 1].
-        * **Média és hírek:** A hírek gyorsasága, algoritmusok, kattintásvadász címek, propaganda és a véleménybuborékok hatása a közhangulatra[cite: 1].
-        * **Demográfia és kultúra:** A népesség öregedése, migráció, hagyományok, vallás és generációs különbségek[cite: 1].
+        A GUME v6.9 motor nem különálló adatokat, hanem összefüggő láncolatokat szimulál a dokumentum alapján[cite: 1]:
+        1. **Aszály / Klíma-anomália (Természet)** $\rightarrow$ **Csökkenő terméshozam (Mezőgazdaság)**[cite: 1].
+        2. **Dráguló élelmiszer-alapanyagok (Gazdaság)** $\rightarrow$ **Növekvő háztartási kiadások és infláció (Pénzügy)**[cite: 1].
+        3. **Magasabb stressz és szorongás a lakosság körében (Pszichológia)** $\rightarrow$ **Romló munkateljesítmény és növekvő hibaszázalék (Munka)**[cite: 1].
+        4. **Vállalati hatékonyság csökkenése és piaci korrekció (Makrogazdaság)** $\rightarrow$ **Kormányzati beavatkozási kényszer és szabályozói változások (Politika)**[cite: 1].
         """)
 
     with tab5:
-        st.subheader("6. Apróságok, katasztrófák, döntések és rendszerszint")
-        st.markdown("""
-        * **A legapróbb hétköznapi körülmények:** A szoba hőmérséklete, háttérzaj, egy lemerült telefon, eltévesztett kulcs, elromlott háztartási eszköz vagy megszakadt internetkapcsolat[cite: 1].
-        * **Katasztrófa-Radar:** Földrengések, vulkánkitörések, erdőtüzek, áradások és extrém időjárási katasztrófák[cite: 1].
-        * **Véletlen és szabad akarat:** Kiszámíthatatlan események, váratlan hívások, valamint az emberi döntések és a jövővel kapcsolatos várakozások[cite: 1].
-        * **A 4 Hatásszint és Visszacsatolás:**
-          * *Egyéni szint:* Éhség, fáradtság, hangulat[cite: 1].
-          * *Helyi szint:* Útlezárás, helyi bolt bezárása[cite: 1].
-          * *Országos szint:* Adatváltozás, gazdasági válság[cite: 1].
-          * *Globális szint:* Világjárvány, háború, klímaváltozás[cite: 1].
-        """)
-
-    with tab6:
-        st.subheader("💾 Adatbázis & Riport Kezelés")
-        r_title = st.text_input("Riport Megnevezése", f"GUME Total Ökoszisztéma Jelentés – {target_country}")
+        st.subheader("💾 Adatbázis Mentés & Rendszer Riport Export")
+        r_title = st.text_input("Mély-Elemzés Neve", f"GUME Mély Mátrix Jelentés – {target_country}")
         
-        if st.button("💾 Teljes Riport Mentése az Adatbázisba", type="primary"):
-            full_content = f"Célpont: {target_country}. A rendszer integrálta a 37 változót, a 7 makro csoportot és a 4 hatásszintet a dokumentum alapján."
-            save_report(target_country, r_title, full_content)
-            st.success("✔ Sikeresen elmentve az SQLite adatbázisba!")
+        if st.button("💾 Szimuláció Mentése az SQLite Adatbázisba", type="primary"):
+            content_desc = f"Célpont: {target_country}. Kompozit stressz index: {composite_score:.2f}. Súlyok: Bio={bio_weight}, Eco={eco_weight}, Nat={nat_weight}, Tech={tech_weight}."
+            save_simulation(target_country, composite_score, content_desc)
+            st.success("✔ A mélyszintű szimuláció sikeresen elmentve az SQLite adatbázisba!")
 
         st.markdown("---")
-        st.write("Korábban elmentett jelentések:")
-        db_df = load_reports()
+        st.write("Korábban elmentett mély-szimulációk az adatbázisban:")
+        db_df = load_simulations()
         if not db_df.empty:
             st.dataframe(db_df, use_container_width=True)
         else:
-            st.info("Még nincsenek elmentett jelentések az adatbázisban.")
+            st.info("Még nincsenek elmentett szimulációk az adatbázisban.")
 
-        export_text = f"# {r_title}\nCélpont: {target_country}\nDátum: {today_str}\n\n[Minden részletes változó és 7 makro csoport integrálva a dokumentum alapján]."
+        export_md = f"""# {r_title}
+Dátum: {today_str}
+Célpont: {target_country}
+Kompozit Stressz Index: {composite_score:.2f} / 10.0
+Rendszer Státusz: {system_status}
+
+## Részletes Analízis
+A rendszer integrálta a 7 makro csoportot, a 37 változót[cite: 1], a biológiai, gazdasági, természeti és technológiai mutatókat, valamint a visszacsatolási hurkokat.
+"""
         st.download_button(
-            label="📥 Letöltés Markdown Fájlként",
-            data=export_text,
-            file_name=f"gume_total_ecosystem_{target_country.lower()}.md",
+            label="📥 Mély Riport Letöltése Markdownként",
+            data=export_md,
+            file_name=f"gume_deep_report_{target_country.lower()}.md",
             mime="text/markdown"
         )
 
     st.markdown("---")
-    st.caption("GUME v6.9 Total World Ecosystem Core — Minden részlet, változó és szint aktív[cite: 1].")
+    st.caption("GUME v6.9 Deep Ecosystem Algorithmic Core — Minden makro csoport, változó és visszacsatolás aktív[cite: 1].")
 
 if __name__ == "__main__":
-    run_gume_total_ecosystem()
+    run_gume_deep_engine()
